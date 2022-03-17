@@ -1,0 +1,17 @@
+[package]
+name = "lcd-lcm1602-i2c"
+version = "0.1.0"
+edition = "2018"
+authors = ["Korbinian Maier <korbinian.maier@posteo.de>"]
+edition = "2018"
+description = "I2C driver for LM1602 LCD displays."
+homepage = "https://github.com/KuabeM/lcd-lcm1602-i2c.git"
+keywords = ["lcd", "LM1602", "embedded", "embedded-hal"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/KuabeM/lcd-lcm1602-i2c.git"
+
+[dependencies]
+ufmt = "0.1.0"
+ufmt-write = "0.1.0"
+embedded-hal = "0.2.3"
