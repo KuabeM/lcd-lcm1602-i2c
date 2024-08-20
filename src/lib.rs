@@ -50,6 +50,7 @@ where
     backlight_state: Backlight,
     cursor_on: bool,
     cursor_blink: bool,
+    font_mode: FontMode,
 }
 
 pub enum DisplayControl {
@@ -70,6 +71,7 @@ pub enum Backlight {
 enum Mode {
     Cmd = 0x00,
     Data = 0x01,
+    EntrySet = 0x04,
     DisplayControl = 0x08,
     FunctionSet = 0x20,
 }
@@ -83,6 +85,19 @@ enum Commands {
 enum BitMode {
     Bit4 = 0x0 << 4,
     Bit8 = 0x1 << 4,
+}
+
+enum EntryMode {
+    CursorLeftToRight = 0x02,
+    CursorRightToLeft = 0x00,
+    DisplayShift = 0x01,
+}
+
+#[repr(u8)]
+#[derive(Copy, Clone)]
+pub enum FontMode {
+    Font5x8 = 0x00,
+    Font5x10 = 0x04,
 }
 
 impl<'a, I, D> Lcd<'a, I, D>
@@ -100,6 +115,7 @@ where
             rows: 0,
             cursor_blink: false,
             cursor_on: false,
+            font_mode: FontMode::Font5x10,
         }
     }
 
@@ -119,6 +135,12 @@ where
 
     pub fn cursor_on(mut self, on: bool) -> Self {
         self.cursor_on = on;
+        self
+    }
+
+    /// Set the font mode.
+    pub fn font_mode(mut self, font_mode: FontMode) -> Self {
+        self.font_mode = font_mode;
         self
     }
 
@@ -150,9 +172,7 @@ where
         // Function set command
         let lines = if self.rows == 0 { 0x00 } else { 0x08 };
         self.command(
-            Mode::FunctionSet as u8 |
-            // 5x8 display: 0x00, 5x10: 0x4
-            lines, // Two line display
+            Mode::FunctionSet as u8 | self.font_mode as u8 | lines, // Two line display
         )?;
 
         let display_ctrl = if self.cursor_on {
@@ -168,9 +188,12 @@ where
         self.command(Mode::DisplayControl as u8 | display_ctrl)?;
         self.command(Mode::Cmd as u8 | Commands::Clear as u8)?; // Clear Display
 
+        self.delay.delay_ms(2);
+
         // Entry right: shifting cursor moves to right
-        self.command(0x04)?;
+        self.command(Mode::EntrySet as u8 | EntryMode::CursorLeftToRight as u8)?;
         self.backlight(self.backlight_state)?;
+        self.return_home()?;
         Ok(self)
     }
 
