@@ -40,7 +40,7 @@ where
     }
 
     /// Zero based number of rows.
-    pub fn rows(mut self, rows: u8) -> Self {
+    pub fn with_rows(mut self, rows: u8) -> Self {
         self.rows = rows;
         self
     }
@@ -48,13 +48,18 @@ where
     /// Set I2C address, see [lcd address].
     ///
     /// [lcd address]: https://badboi.dev/rust,/microcontrollers/2020/11/09/i2c-hello-world.html
-    pub fn address(mut self, address: u8) -> Self {
+    pub fn with_address(mut self, address: u8) -> Self {
         self.address = address;
         self
     }
 
-    pub fn cursor_on(mut self, on: bool) -> Self {
+    pub fn with_cursor_on(mut self, on: bool) -> Self {
         self.cursor_on = on;
+        self
+    }
+
+    pub fn with_cursor_blink(mut self, blink: bool) -> Self {
+        self.cursor_blink = blink;
         self
     }
 
