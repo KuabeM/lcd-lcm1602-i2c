@@ -14,3 +14,8 @@ repository = "https://github.com/KuabeM/lcd-lcm1602-i2c.git"
 ufmt = "0.2.0"
 ufmt-write = "0.1.0"
 embedded-hal = "1.0.0"
+embedded-hal-async = { version = "1.0.0", optional = true }
+
+[features]
+default=[]
+async = ["dep:embedded-hal-async"]
