@@ -51,8 +51,10 @@ pub enum Backlight {
 enum Mode {
     Cmd = 0x00,
     Data = 0x01,
+    EntrySet = 0x04,
     DisplayControl = 0x08,
     FunctionSet = 0x20,
+    DDRAMAddr = 0x80,
 }
 
 enum Commands {
@@ -66,3 +68,16 @@ enum BitMode {
     Bit8 = 0x1 << 4,
 }
 
+#[repr(u8)]
+#[derive(Copy, Clone)]
+enum CursorMoveDir {
+    Right = 0x00,
+    Left = 0x02,
+}
+
+#[repr(u8)]
+#[derive(Copy, Clone)]
+enum DisplayShift {
+    Decrement = 0x00,
+    Increment = 0x01,
+}
