@@ -4,7 +4,7 @@ use embedded_hal::i2c::I2c;
 
 use ufmt_write::uWrite;
 
-use crate::{Backlight, BitMode, Commands, CursorMoveDir, DisplayControl, DisplayShift, Mode};
+use crate::{Backlight, BitMode, Commands, CursorMoveDir, DisplayControl, DisplayShift, Font, Mode};
 
 /// API to write to the LCD.
 pub struct Lcd<'a, I, D>
@@ -19,6 +19,7 @@ where
     backlight_state: Backlight,
     cursor_on: bool,
     cursor_blink: bool,
+    font_mode: Font,
 }
 
 impl<'a, I, D> Lcd<'a, I, D>
@@ -36,6 +37,7 @@ where
             rows: 0,
             cursor_blink: false,
             cursor_on: false,
+            font_mode: Font::Font5x8,
         }
     }
 
@@ -88,25 +90,9 @@ where
         let mode_4bit = Mode::FunctionSet as u8 | BitMode::Bit4 as u8;
         self.write4bits(mode_4bit)?;
 
-        // Function set command
-        let lines = if self.rows == 0 { 0x00 } else { 0x08 };
-        self.command(
-            Mode::FunctionSet as u8 |
-            // 5x8 display: 0x00, 5x10: 0x4
-            lines, // Two line display
-        )?;
+        self.update_function_set()?;
 
-        let display_ctrl = if self.cursor_on {
-            DisplayControl::DisplayOn as u8 | DisplayControl::CursosOn as u8
-        } else {
-            DisplayControl::DisplayOn as u8
-        };
-        let display_ctrl = if self.cursor_blink {
-            display_ctrl | DisplayControl::CursorBlink as u8
-        } else {
-            display_ctrl
-        };
-        self.command(Mode::DisplayControl as u8 | display_ctrl)?;
+        self.update_display_control()?;
         self.command(Mode::Cmd as u8 | Commands::Clear as u8)?; // Clear Display
 
         // Entry right: shifting cursor moves to right
@@ -174,6 +160,71 @@ where
     pub fn set_cursor(&mut self, row: u8, col: u8) -> Result<(), I::Error> {
         let shift: u8 = row * 0x40 + col;
         self.command(Mode::DDRAMAddr as u8 | shift)
+    }
+
+    
+    /// Recomputes display_ctrl and updates the lcd
+    fn update_display_control(&mut self) -> Result<(), I::Error> {
+        let display_ctrl = if self.cursor_on {
+            DisplayControl::DisplayOn as u8 | DisplayControl::CursorOn as u8
+        } else {
+            DisplayControl::DisplayOn as u8
+        };
+        let display_ctrl = if self.cursor_blink {
+            display_ctrl | DisplayControl::CursorBlink as u8
+        } else {
+            display_ctrl
+        };
+        self.command(Mode::DisplayControl as u8 | display_ctrl)
+    }
+
+    // Set if the cursor is blinking
+    pub fn cursor_blink(&mut self, blink: bool) -> Result<(), I::Error> {
+        self.cursor_blink = blink;
+        self.update_display_control()
+    }
+
+    // Set the curser visibility
+    pub fn cursor_on(&mut self, on: bool) -> Result<(), I::Error> {
+        self.cursor_on = on;
+        self.update_display_control()
+    }
+
+    /// Recomputes function set and updates the lcd
+    fn update_function_set(&mut self) -> Result<(), I::Error> {
+        // Function set command
+        let lines = if self.rows == 0 { 0x00 } else { 0x08 };
+        self.command(
+            Mode::FunctionSet as u8 |
+            self.font_mode as u8 |
+            lines, // Two line display
+        )
+    }
+
+    /// Set the font mode used (5x8 or 5x10)
+    pub fn font_mode(&mut self, mode: Font) -> Result<(), I::Error> {
+        self.font_mode = mode;
+        self.update_function_set()
+    }
+
+    /// Scrolls the display one char to the left
+    pub fn scroll_display_left(&mut self) -> Result<(), I::Error> {
+        self.command(Commands::ShiftDisplayLeft as u8)
+    }
+
+    /// Scrolls the display one char to the right
+    pub fn scroll_display_right(&mut self) -> Result<(), I::Error> {
+        self.command(Commands::ShiftDisplayRight as u8)
+    }
+
+    /// Scrolls the cursor one char to the left
+    pub fn scroll_cursor_left(&mut self) -> Result<(), I::Error> {
+        self.command(Commands::ShiftCursorLeft as u8)
+    }
+
+    /// Scrolls the cursor one char to the right
+    pub fn scroll_cursor_right(&mut self) -> Result<(), I::Error> {
+        self.command(Commands::ShiftCursorRight as u8)
     }
         }
 
