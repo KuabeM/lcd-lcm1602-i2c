@@ -20,9 +20,9 @@
 //! let mut delay = arduino_hal::Delay::new();
 //!
 //! let mut lcd = lcd_lcm1602_i2c::Lcd::new(&mut i2c, &mut delay)
-//!     .address(LCD_ADDRESS)
-//!     .cursor_on(false) // no visible cursos
-//!     .rows(2) // two rows
+//!     .with_address(LCD_ADDRESS)
+//!     .with_cursor_on(false) // no visible cursos
+//!     .with_rows(2) // two rows
 //!     .init().unwrap();
 //! ```
 //!
@@ -36,7 +36,7 @@ pub mod sync_lcd;
 pub enum DisplayControl {
     Off = 0x00,
     CursorBlink = 0x01,
-    CursosOn = 0x02,
+    CursorOn = 0x02,
     DisplayOn = 0x04,
 }
 
