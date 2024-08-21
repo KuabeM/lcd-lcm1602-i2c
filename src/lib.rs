@@ -60,12 +60,22 @@ enum Mode {
 enum Commands {
     Clear = 0x01,
     ReturnHome = 0x02,
-    ShiftCursor = 16 | 4,
+    ShiftCursorLeft = 16,
+    ShiftCursorRight = 16 | 4,
+    ShiftDisplayLeft = 16 | 8,
+    ShiftDisplayRight = 16 | 8 | 4,
 }
 
 enum BitMode {
     Bit4 = 0x0 << 4,
     Bit8 = 0x1 << 4,
+}
+
+#[repr(u8)]
+#[derive(Copy, Clone)]
+pub enum Font {
+    Font5x8 = 0x00,
+    Font5x10 = 0x04, 
 }
 
 #[repr(u8)]
