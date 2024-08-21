@@ -77,6 +77,10 @@ where
         // Initial delay to wait for init after power on.
         self.delay.delay_ms(80);
 
+        self.backlight(self.backlight_state)?;
+
+        self.delay.delay_ms(1);
+
         // Init with 8 bit mode
         let mode_8bit = Mode::FunctionSet as u8 | BitMode::Bit8 as u8;
         self.write4bits(mode_8bit)?;
@@ -95,13 +99,19 @@ where
         self.update_display_control()?;
         self.command(Mode::Cmd as u8 | Commands::Clear as u8)?; // Clear Display
 
+        self.delay.delay_ms(2);
+
         // Entry right: shifting cursor moves to right
         self.command(Mode::EntrySet as u8 | CursorMoveDir::Left as u8 | DisplayShift::Decrement as u8 )?;
-        self.backlight(self.backlight_state)?;
+        self.return_home()?;
         Ok(self)
     }
 
     fn write4bits(&mut self, data: u8) -> Result<(), I::Error> {
+        self.i2c.write(
+            self.address,
+            &[data | DisplayControl::Off as u8 | self.backlight_state as u8],
+        )?;
         self.i2c.write(
             self.address,
             &[data | DisplayControl::DisplayOn as u8 | self.backlight_state as u8],
@@ -130,7 +140,7 @@ where
         self.backlight_state = backlight;
         self.i2c.write(
             self.address,
-            &[DisplayControl::DisplayOn as u8 | backlight as u8],
+            &[DisplayControl::Off as u8 | backlight as u8],
         )
     }
 
@@ -226,7 +236,7 @@ where
     pub fn scroll_cursor_right(&mut self) -> Result<(), I::Error> {
         self.command(Commands::ShiftCursorRight as u8)
     }
-        }
+}
 
 impl<'a, I, D> uWrite for Lcd<'a, I, D>
 where
