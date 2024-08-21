@@ -110,7 +110,7 @@ where
         self.command(Mode::Cmd as u8 | Commands::Clear as u8)?; // Clear Display
 
         // Entry right: shifting cursor moves to right
-        self.command(0x04)?;
+        self.command(Mode::EntrySet as u8 | CursorMoveDir::Left as u8 | DisplayShift::Decrement as u8 )?;
         self.backlight(self.backlight_state)?;
         Ok(self)
     }
@@ -172,14 +172,10 @@ where
 
     /// Set the cursor to (rows, col). Coordinates are zero-based.
     pub fn set_cursor(&mut self, row: u8, col: u8) -> Result<(), I::Error> {
-        self.return_home()?;
-        let shift: u8 = row * 40 + col;
-        for _i in 0..shift {
-            self.command(Commands::ShiftCursor as u8)?;
-        }
-        Ok(())
+        let shift: u8 = row * 0x40 + col;
+        self.command(Mode::DDRAMAddr as u8 | shift)
     }
-}
+        }
 
 impl<'a, I, D> uWrite for Lcd<'a, I, D>
 where
