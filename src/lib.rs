@@ -82,14 +82,14 @@ pub enum Font {
 
 #[repr(u8)]
 #[derive(Copy, Clone)]
-enum CursorMoveDir {
+pub enum CursorMoveDir {
     Right = 0x00,
     Left = 0x02,
 }
 
 #[repr(u8)]
 #[derive(Copy, Clone)]
-enum DisplayShift {
+pub enum DisplayShift {
     Decrement = 0x00,
     Increment = 0x01,
 }
