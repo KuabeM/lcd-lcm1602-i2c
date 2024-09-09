@@ -1,6 +1,8 @@
 use embedded_hal_async::{delay::DelayNs, i2c::I2c};
 
-use crate::{Backlight, BitMode, Commands, CursorMoveDir, DisplayControl, DisplayShift, Font, Mode};
+use crate::{
+    Backlight, BitMode, Commands, CursorMoveDir, DisplayControl, DisplayShift, Font, Mode,
+};
 
 /// API to write to the LCD.
 pub struct Lcd<'a, I, D>
@@ -91,29 +93,39 @@ where
         self.update_function_set().await?;
 
         self.update_display_control().await?;
-        self.command(Mode::Cmd as u8 | Commands::Clear as u8).await?; // Clear Display
+        self.command(Mode::Cmd as u8 | Commands::Clear as u8)
+            .await?; // Clear Display
 
         self.delay.delay_ms(2).await;
 
         // Entry right: shifting cursor moves to right
-        self.command(Mode::EntrySet as u8 | CursorMoveDir::Left as u8 | DisplayShift::Decrement as u8 ).await?;
+        self.command(
+            Mode::EntrySet as u8 | CursorMoveDir::Left as u8 | DisplayShift::Decrement as u8,
+        )
+        .await?;
         self.return_home().await?;
         Ok(self)
     }
 
     async fn write4bits(&mut self, data: u8) -> Result<(), I::Error> {
-        self.i2c.write(
-            self.address,
-            &[data | DisplayControl::Off as u8 | self.backlight_state as u8],
-        ).await?;
-        self.i2c.write(
-            self.address,
-            &[data | DisplayControl::DisplayOn as u8 | self.backlight_state as u8],
-        ).await?;
-        self.i2c.write(
-            self.address,
-            &[DisplayControl::Off as u8 | self.backlight_state as u8],
-        ).await?;
+        self.i2c
+            .write(
+                self.address,
+                &[data | DisplayControl::Off as u8 | self.backlight_state as u8],
+            )
+            .await?;
+        self.i2c
+            .write(
+                self.address,
+                &[data | DisplayControl::DisplayOn as u8 | self.backlight_state as u8],
+            )
+            .await?;
+        self.i2c
+            .write(
+                self.address,
+                &[DisplayControl::Off as u8 | self.backlight_state as u8],
+            )
+            .await?;
         self.delay.delay_us(700).await;
         Ok(())
     }
@@ -132,10 +144,9 @@ where
 
     pub async fn backlight(&mut self, backlight: Backlight) -> Result<(), I::Error> {
         self.backlight_state = backlight;
-        self.i2c.write(
-            self.address,
-            &[DisplayControl::Off as u8 | backlight as u8],
-        ).await
+        self.i2c
+            .write(self.address, &[DisplayControl::Off as u8 | backlight as u8])
+            .await
     }
 
     /// Write string to display.
@@ -178,7 +189,8 @@ where
         } else {
             display_ctrl
         };
-        self.command(Mode::DisplayControl as u8 | display_ctrl).await
+        self.command(Mode::DisplayControl as u8 | display_ctrl)
+            .await
     }
 
     // Set if the cursor is blinking
@@ -198,10 +210,9 @@ where
         // Function set command
         let lines = if self.rows == 0 { 0x00 } else { 0x08 };
         self.command(
-            Mode::FunctionSet as u8 |
-            self.font_mode as u8 |
-            lines, // Two line display
-        ).await
+            Mode::FunctionSet as u8 | self.font_mode as u8 | lines, // Two line display
+        )
+        .await
     }
 
     /// Set the font mode used (5x8 or 5x10)

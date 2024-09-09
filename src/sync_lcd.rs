@@ -1,10 +1,11 @@
-
 use embedded_hal::delay::DelayNs;
 use embedded_hal::i2c::I2c;
 
 use ufmt_write::uWrite;
 
-use crate::{Backlight, BitMode, Commands, CursorMoveDir, DisplayControl, DisplayShift, Font, Mode};
+use crate::{
+    Backlight, BitMode, Commands, CursorMoveDir, DisplayControl, DisplayShift, Font, Mode,
+};
 
 /// API to write to the LCD.
 pub struct Lcd<'a, I, D>
@@ -102,7 +103,9 @@ where
         self.delay.delay_ms(2);
 
         // Entry right: shifting cursor moves to right
-        self.command(Mode::EntrySet as u8 | CursorMoveDir::Left as u8 | DisplayShift::Decrement as u8 )?;
+        self.command(
+            Mode::EntrySet as u8 | CursorMoveDir::Left as u8 | DisplayShift::Decrement as u8,
+        )?;
         self.return_home()?;
         Ok(self)
     }
@@ -138,10 +141,8 @@ where
 
     pub fn backlight(&mut self, backlight: Backlight) -> Result<(), I::Error> {
         self.backlight_state = backlight;
-        self.i2c.write(
-            self.address,
-            &[DisplayControl::Off as u8 | backlight as u8],
-        )
+        self.i2c
+            .write(self.address, &[DisplayControl::Off as u8 | backlight as u8])
     }
 
     /// Write string to display.
@@ -172,7 +173,6 @@ where
         self.command(Mode::DDRAMAddr as u8 | shift)
     }
 
-    
     /// Recomputes display_ctrl and updates the lcd
     fn update_display_control(&mut self) -> Result<(), I::Error> {
         let display_ctrl = if self.cursor_on {
@@ -205,9 +205,7 @@ where
         // Function set command
         let lines = if self.rows == 0 { 0x00 } else { 0x08 };
         self.command(
-            Mode::FunctionSet as u8 |
-            self.font_mode as u8 |
-            lines, // Two line display
+            Mode::FunctionSet as u8 | self.font_mode as u8 | lines, // Two line display
         )
     }
 

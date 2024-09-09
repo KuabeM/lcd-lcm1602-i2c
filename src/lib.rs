@@ -31,10 +31,9 @@
 //! [this one]: https://funduinoshop.com/elektronische-module/displays/lcd/16x02-i2c-lcd-modul-hintergrundbeleuchtung-blau
 //! [lcd address]: https://www.ardumotive.com/i2clcden.html
 
-
-pub mod sync_lcd;
 #[cfg(feature = "async")]
 pub mod async_lcd;
+pub mod sync_lcd;
 
 pub enum DisplayControl {
     Off = 0x00,
@@ -78,7 +77,7 @@ enum BitMode {
 #[derive(Copy, Clone)]
 pub enum Font {
     Font5x8 = 0x00,
-    Font5x10 = 0x04, 
+    Font5x10 = 0x04,
 }
 
 #[repr(u8)]
