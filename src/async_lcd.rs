@@ -1,18 +1,17 @@
 use embedded_hal_async::{delay::DelayNs, i2c::I2c};
 
 use crate::{
-    Backlight, BitMode, Commands, CursorMoveDir, DisplayControl, DisplayShift, Font, Mode,
+    Backlight, BitMode, Commands, CursorMoveDir, DisplayControl, DisplayShift, Font, Mode, OFFSETS_16X4, OFFSETS_NORMAL,
 };
 
 /// API to write to the LCD.
-pub struct Lcd<'a, I, D>
+pub struct Lcd<'a, const ROWS: u8, const COLUMNS: u8, I, D>
 where
     I: I2c,
     D: DelayNs,
 {
     i2c: &'a mut I,
     address: u8,
-    rows: u8,
     delay: &'a mut D,
     backlight_state: Backlight,
     cursor_on: bool,
@@ -20,29 +19,25 @@ where
     font_mode: Font,
 }
 
-impl<'a, I, D> Lcd<'a, I, D>
+impl<'a, const ROWS: u8, const COLUMNS: u8, I, D> Lcd<'a, ROWS, COLUMNS, I, D>
 where
     I: I2c,
     D: DelayNs,
 {
     /// Create new instance with only the I2C and delay instance.
     pub fn new(i2c: &'a mut I, delay: &'a mut D) -> Self {
+        assert!(ROWS > 0, "ROWS needs to be larger than zero!");
+        assert!(COLUMNS > 0, "COLUMNS needs to be larger than zero!");
+        assert!(ROWS < 5, "This library only supports LCDs with up to four rows!"); // Because we don't have offets for more than four rows
         Self {
             i2c,
             delay,
             backlight_state: Backlight::On,
             address: 0,
-            rows: 0,
             cursor_blink: false,
             cursor_on: false,
             font_mode: Font::Font5x8,
         }
-    }
-
-    /// Zero based number of rows.
-    pub fn with_rows(mut self, rows: u8) -> Self {
-        self.rows = rows;
-        self
     }
 
     /// Set I2C address, see [lcd address].
@@ -173,7 +168,16 @@ where
 
     /// Set the cursor to (rows, col). Coordinates are zero-based.
     pub async fn set_cursor(&mut self, row: u8, col: u8) -> Result<(), I::Error> {
-        let shift: u8 = row * 0x40 + col;
+        assert!(row < ROWS, "Row needs to be smaller than ROWS");
+        assert!(col < COLUMNS, "col needs to be smaller than COLUMNS");
+
+        let offset = if ROWS == 4 && COLUMNS == 16 {
+            OFFSETS_16X4[row as usize]
+        } else {
+            OFFSETS_NORMAL[row as usize]
+        };
+
+        let shift: u8 = col + offset;
         self.command(Mode::DDRAMAddr as u8 | shift).await
     }
 
@@ -208,7 +212,10 @@ where
     /// Recomputes function set and updates the lcd
     async fn update_function_set(&mut self) -> Result<(), I::Error> {
         // Function set command
-        let lines = if self.rows == 0 { 0x00 } else { 0x08 };
+        let lines = match ROWS {
+            1 => 0x00,
+            _ => 0x08
+        };
         self.command(
             Mode::FunctionSet as u8 | self.font_mode as u8 | lines, // Two line display
         )

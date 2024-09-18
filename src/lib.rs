@@ -31,6 +31,8 @@
 //! [this one]: https://funduinoshop.com/elektronische-module/displays/lcd/16x02-i2c-lcd-modul-hintergrundbeleuchtung-blau
 //! [lcd address]: https://www.ardumotive.com/i2clcden.html
 
+use sync_lcd::Lcd;
+
 #[cfg(feature = "async")]
 pub mod async_lcd;
 pub mod sync_lcd;
@@ -93,3 +95,18 @@ pub enum DisplayShift {
     Decrement = 0x00,
     Increment = 0x01,
 }
+
+// offsets taken from the NewLiquidCrystal library
+const OFFSETS_NORMAL: [u8; 4] = [ 0x00, 0x40, 0x14, 0x54 ]; // For regular LCDs
+const OFFSETS_16X4: [u8; 4] = [ 0x00, 0x40, 0x10, 0x50 ]; // For 16x4 LCDs
+
+pub type LCD16x2<'a, I, D> = Lcd<'a, 2, 16, I, D>;
+pub type LCD16x4<'a, I, D> = Lcd<'a, 4, 16, I, D>;
+pub type LCD20x4<'a, I, D> = Lcd<'a, 4, 20, I, D>;
+
+#[cfg(feature = "async")]
+pub type AsyncLCD16x2<'a, I, D> = async_lcd::Lcd<'a, 2, 16, I, D>;
+#[cfg(feature = "async")]
+pub type AsyncLCD16x4<'a, I, D> = async_lcd::Lcd<'a, 4, 16, I, D>;
+#[cfg(feature = "async")]
+pub type AsyncLCD20x4<'a, I, D> = async_lcd::Lcd<'a, 4, 20, I, D>;
