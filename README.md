@@ -3,6 +3,9 @@
 Driver to write characters to LCD displays with a LM1602 connected via i2c like [this one] with
 16x2 characters. It requires a I2C instance implementing [`embedded_hal::blocking::i2c::Write`]
 and a instance to delay execution with [`embedded_hal::blocking::delay::DelayMs`].
+Other LCD sizes are supported, up to displays with 20x4 characters. Everything that uses a
+HD44780U or comparable controller and is connected via i2c should work.
+Like [this]
 
 Usage:
 ```
@@ -20,10 +23,9 @@ let mut i2c = arduino_hal::I2c::new(
 );
 let mut delay = arduino_hal::Delay::new();
 
-let mut lcd = lcd_lcm1602_i2c::Lcd::new(&mut i2c, &mut delay)
+let mut lcd = lcd_lcm1602_i2c::LCD16x2::new(&mut i2c, &mut delay)
     .address(LCD_ADDRESS)
-    .cursor_on(false) // no visible cursos
-    .rows(2) // two rows
+    .cursor_on(false) // no visible cursor
     .init().unwrap();
 ```
 
@@ -34,4 +36,4 @@ There is a similar crate [lcd_1602_i2c] but that did not work with [this display
 [this one]: https://funduinoshop.com/elektronische-module/displays/lcd/16x02-i2c-lcd-modul-hintergrundbeleuchtung-blau
 [lcd address]: https://www.ardumotive.com/i2clcden.html
 [lcd_1602_i2c]: https://crates.io/crates/lcd_1602_i2c
-
+[this]: https://www.az-delivery.de/en/products/hd44780-2004-lcd-display-bundle-4x20-zeichen-mit-i2c-schnittstelle
