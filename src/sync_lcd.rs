@@ -4,7 +4,8 @@ use embedded_hal::i2c::I2c;
 use ufmt_write::uWrite;
 
 use crate::{
-    Backlight, BitMode, Commands, CursorMoveDir, DisplayControl, DisplayShift, Font, Mode, OFFSETS_16X4, OFFSETS_NORMAL,
+    Backlight, BitMode, Commands, CursorMoveDir, DisplayControl, DisplayShift, Font, Mode,
+    OFFSETS_16X4, OFFSETS_NORMAL,
 };
 
 /// API to write to the LCD.
@@ -31,7 +32,10 @@ where
     pub fn new(i2c: &'a mut I, delay: &'a mut D) -> Self {
         assert!(ROWS > 0, "ROWS needs to be larger than zero!");
         assert!(COLUMNS > 0, "COLUMNS needs to be larger than zero!");
-        assert!(ROWS < 5, "This library only supports LCDs with up to four rows!"); // Because we don't have offets for more than four rows
+        assert!(
+            ROWS < 5,
+            "This library only supports LCDs with up to four rows!"
+        ); // Because we don't have offsets for more than four rows
         Self {
             i2c,
             delay,
@@ -166,7 +170,7 @@ where
     pub fn set_cursor(&mut self, row: u8, col: u8) -> Result<(), I::Error> {
         assert!(row < ROWS, "Row needs to be smaller than ROWS");
         assert!(col < COLUMNS, "col needs to be smaller than COLUMNS");
-        
+
         let offset = if ROWS == 4 && COLUMNS == 16 {
             OFFSETS_16X4[row as usize]
         } else {
@@ -209,7 +213,7 @@ where
         // Function set command
         let lines = match ROWS {
             1 => 0x00,
-            _ => 0x08
+            _ => 0x08,
         };
         self.command(
             Mode::FunctionSet as u8 | self.font_mode as u8 | lines, // Two line display

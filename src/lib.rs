@@ -97,8 +97,8 @@ pub enum DisplayShift {
 }
 
 // offsets taken from the NewLiquidCrystal library
-const OFFSETS_NORMAL: [u8; 4] = [ 0x00, 0x40, 0x14, 0x54 ]; // For regular LCDs
-const OFFSETS_16X4: [u8; 4] = [ 0x00, 0x40, 0x10, 0x50 ]; // For 16x4 LCDs
+const OFFSETS_NORMAL: [u8; 4] = [0x00, 0x40, 0x14, 0x54]; // For regular LCDs
+const OFFSETS_16X4: [u8; 4] = [0x00, 0x40, 0x10, 0x50]; // For 16x4 LCDs
 
 pub type LCD16x2<'a, I, D> = Lcd<'a, 2, 16, I, D>;
 pub type LCD16x4<'a, I, D> = Lcd<'a, 4, 16, I, D>;

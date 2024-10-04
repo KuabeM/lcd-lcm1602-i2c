@@ -1,7 +1,8 @@
 use embedded_hal_async::{delay::DelayNs, i2c::I2c};
 
 use crate::{
-    Backlight, BitMode, Commands, CursorMoveDir, DisplayControl, DisplayShift, Font, Mode, OFFSETS_16X4, OFFSETS_NORMAL,
+    Backlight, BitMode, Commands, CursorMoveDir, DisplayControl, DisplayShift, Font, Mode,
+    OFFSETS_16X4, OFFSETS_NORMAL,
 };
 
 /// API to write to the LCD.
@@ -28,7 +29,10 @@ where
     pub fn new(i2c: &'a mut I, delay: &'a mut D) -> Self {
         assert!(ROWS > 0, "ROWS needs to be larger than zero!");
         assert!(COLUMNS > 0, "COLUMNS needs to be larger than zero!");
-        assert!(ROWS < 5, "This library only supports LCDs with up to four rows!"); // Because we don't have offets for more than four rows
+        assert!(
+            ROWS < 5,
+            "This library only supports LCDs with up to four rows!"
+        ); // Because we don't have offsets for more than four rows
         Self {
             i2c,
             delay,
@@ -214,7 +218,7 @@ where
         // Function set command
         let lines = match ROWS {
             1 => 0x00,
-            _ => 0x08
+            _ => 0x08,
         };
         self.command(
             Mode::FunctionSet as u8 | self.font_mode as u8 | lines, // Two line display
