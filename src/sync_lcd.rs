@@ -30,12 +30,14 @@ where
 {
     /// Create new instance with only the I2C and delay instance.
     pub fn new(i2c: &'a mut I, delay: &'a mut D) -> Self {
-        assert!(ROWS > 0, "ROWS needs to be larger than zero!");
-        assert!(COLUMNS > 0, "COLUMNS needs to be larger than zero!");
-        assert!(
-            ROWS < 5,
-            "This library only supports LCDs with up to four rows!"
-        ); // Because we don't have offsets for more than four rows
+        const {
+            assert!(ROWS > 0, "ROWS needs to be larger than zero!");
+            assert!(COLUMNS > 0, "COLUMNS needs to be larger than zero!");
+            assert!(
+                ROWS < 5,
+                "This library only supports LCDs with up to four rows!"
+            ); // Because we don't have offsets for more than four rows
+        };
         Self {
             i2c,
             delay,
